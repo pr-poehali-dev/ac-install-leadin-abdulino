@@ -1,0 +1,18 @@
+{
+  "tests": [
+    {
+      "name": "Успешная заявка",
+      "method": "POST",
+      "path": "/",
+      "body": {"name": "Тест", "phone": "+79001234567", "message": "Нужна установка"},
+      "expectedStatus": 200
+    },
+    {
+      "name": "Ошибка — нет имени",
+      "method": "POST",
+      "path": "/",
+      "body": {"phone": "+79001234567"},
+      "expectedStatus": 400
+    }
+  ]
+}

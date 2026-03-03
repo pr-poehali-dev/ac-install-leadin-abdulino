@@ -3,6 +3,7 @@ import Icon from "@/components/ui/icon";
 
 const PHONE = "+79878786440";
 const PHONE_DISPLAY = "+7 (987) 878-64-40";
+const SUBMIT_URL = "https://functions.poehali.dev/69e75e14-2e95-474d-9102-5031ca3581c0";
 
 const services = [
   { icon: "Wind", title: "Сплит-системы", desc: "Монтаж настенных кондиционеров любой марки — Haier, Daikin, Mitsubishi, LG и другие" },
@@ -53,6 +54,112 @@ function FaqItem({ q, a }: { q: string; a: string }) {
         <div className="px-6 pb-5 text-white/60 font-body leading-relaxed">{a}</div>
       )}
     </div>
+  );
+}
+
+function LeadForm() {
+  const { ref, inView } = useInView();
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !phone.trim()) return;
+    setStatus("loading");
+    try {
+      const res = await fetch(SUBMIT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, phone }),
+      });
+      if (res.ok) {
+        setStatus("success");
+        setName("");
+        setPhone("");
+      } else {
+        setStatus("error");
+      }
+    } catch {
+      setStatus("error");
+    }
+  };
+
+  return (
+    <section id="lead-form" className="py-24" ref={ref}>
+      <div className="container mx-auto px-6 max-w-2xl">
+        <div
+          className="rounded-3xl p-10 transition-all duration-700"
+          style={{
+            background: "linear-gradient(135deg, rgba(0,212,255,0.08), rgba(0,102,255,0.08))",
+            border: "1px solid rgba(0,212,255,0.2)",
+            opacity: inView ? 1 : 0,
+            transform: inView ? "translateY(0)" : "translateY(30px)",
+          }}
+        >
+          <div className="text-center mb-8">
+            <p className="font-body text-cyan-400 text-sm tracking-widest uppercase mb-3">Бесплатно</p>
+            <h2 className="font-heading text-4xl text-white tracking-wide mb-3">ОСТАВЬТЕ ЗАЯВКУ</h2>
+            <p className="text-white/50">Перезвоним в течение 15 минут и рассчитаем стоимость</p>
+          </div>
+
+          {status === "success" ? (
+            <div className="text-center py-8">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+                style={{ background: "linear-gradient(135deg, #00d4ff, #0066ff)" }}>
+                <Icon name="Check" size={28} className="text-white" />
+              </div>
+              <h3 className="font-heading text-2xl text-white tracking-wide mb-2">ЗАЯВКА ПРИНЯТА!</h3>
+              <p className="text-white/50">Мы свяжемся с вами в ближайшее время</p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <div>
+                <input
+                  type="text"
+                  placeholder="Ваше имя"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  className="w-full px-5 py-4 rounded-2xl font-body text-white placeholder-white/30 outline-none transition-all focus:ring-2"
+                  style={{
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    focusRingColor: "#00d4ff",
+                  }}
+                />
+              </div>
+              <div>
+                <input
+                  type="tel"
+                  placeholder="Номер телефона"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                  className="w-full px-5 py-4 rounded-2xl font-body text-white placeholder-white/30 outline-none transition-all focus:ring-2"
+                  style={{
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                  }}
+                />
+              </div>
+              {status === "error" && (
+                <p className="text-red-400 text-sm text-center">Произошла ошибка. Позвоните нам напрямую.</p>
+              )}
+              <button
+                type="submit"
+                disabled={status === "loading"}
+                className="w-full py-4 rounded-2xl text-white font-medium font-body text-lg transition-all hover:scale-105 disabled:opacity-60"
+                style={{ background: "linear-gradient(135deg, #00d4ff, #0066ff)", boxShadow: "0 0 30px rgba(0,212,255,0.3)" }}
+              >
+                {status === "loading" ? "Отправляем..." : "Отправить заявку"}
+              </button>
+              <p className="text-center text-white/30 text-xs">Нажимая кнопку, вы соглашаетесь на обработку персональных данных</p>
+            </form>
+          )}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -248,6 +355,9 @@ export default function Index() {
           </div>
         </div>
       </section>
+
+      {/* LEAD FORM */}
+      <LeadForm />
 
       {/* FAQ */}
       <section className="py-24" ref={faq2.ref}>
